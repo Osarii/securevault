@@ -34,8 +34,20 @@ class PostgresAdapter {
         }
       : false;
 
+    // Strip sslmode from URL when explicit sslConfig is provided so pg honors rejectUnauthorized/ca cleanly
+    let cleanConnStr = connectionString;
+    if (useSsl && !config.dbSslRejectUnauthorized) {
+      try {
+        const u = new URL(connectionString);
+        u.searchParams.delete('sslmode');
+        cleanConnStr = u.toString();
+      } catch {
+        cleanConnStr = connectionString;
+      }
+    }
+
     this.pool = new Pool({
-      connectionString,
+      connectionString: cleanConnStr,
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: config.dbQueryTimeoutMs,
