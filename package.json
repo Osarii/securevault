@@ -1,0 +1,32 @@
+{
+  "name": "securevault",
+  "version": "1.0.0",
+  "description": "SecureVault — Sistema seguro en Node.js con controles OWASP Top 10:2025, Argon2id, AES-256-GCM con rotación de llaves, MFA TOTP y despliegue en producción.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "rotate-keys": "node scripts/rotate-keys.js",
+    "keygen": "node -e \"console.log(require('node:crypto').randomBytes(32).toString('base64'))\"",
+    "test": "node --test tests/*.test.js",
+    "verify:security": "node scripts/verify-security.js"
+  },
+  "dependencies": {
+    "argon2": "^0.41.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
+    "pg": "^8.14.1",
+    "pino": "^9.6.0",
+    "zod": "^4.6.7"
+  }
+}
