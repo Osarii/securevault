@@ -117,16 +117,42 @@ Al registrar un evento `LOGIN_FAILED` que incluía intencionalmente una clave pr
 
 ---
 
-## 4. Verificaciones Pendientes Sobre la URL Pública de Producción
+## 4. Verificaciones en la URL Pública de Producción
 
-Una vez publicada la aplicación en Render + Neon siguiendo `README.md`, ejecutar y adjuntar capturas de los cuatro escaneos externos sobre la URL propia del equipo:
+**URL pública de producción (Vercel + Proxy same-origin → Render → Supabase PostgreSQL TLS):**  
+- **Aplicación:** https://securevault-gamma.vercel.app  
+- **Backend API (Render):** https://securevault-api-zo4v.onrender.com  
+- **Repositorio GitHub:** https://github.com/Osarii/securevault
 
-| Herramienta | Comando / URL | Meta esperada | Estado |
-|---|---|---|---|
-| **Script de verificación propio** | `TARGET_URL=https://<tu-app>.onrender.com npm run verify:security` | Cabeceras completas, `/health` 200, SQLi 400, Admin 401, SRI `true` | Listo para ejecutar en prod |
-| **Security Headers** | `https://securityheaders.com/?q=https://<tu-app>.onrender.com&followRedirects=on` | Calificación **A** o **A+** | Pendiente de URL pública |
-| **Qualys SSL Labs** | `https://www.ssllabs.com/ssltest/analyze.html?d=<tu-app>.onrender.com` | Calificación **A / A+** (TLS 1.2/1.3) | Pendiente de URL pública |
-| **OWASP ZAP Baseline** | Ejecutar ZAP Desktop o GitHub Action `zaproxy/action-baseline@v0.14.0` contra `https://<tu-app>.onrender.com` | 0 alertas High/Critical | Pendiente de URL pública |
+### 4.1 Evidencia real ejecutada contra producción (`TARGET_URL=https://securevault-gamma.vercel.app`)
+
+```text
+=== SecureVault Post-Deploy Security Check ===
+Target: https://securevault-gamma.vercel.app
+
+[RF-08] GET /health -> 200 {"status":"ok"}
+
+[A02] Cabeceras HTTP de seguridad:
+  content-security-policy: default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; frame-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; worker-src 'none'; manifest-src 'self'; upgrade-insecure-requests
+  strict-transport-security: max-age=31536000; includeSubDomains; preload
+  x-content-type-options: nosniff
+  x-frame-options: DENY
+  referrer-policy: strict-origin-when-cross-origin
+  permissions-policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  x-powered-by: (ausente)
+
+[A05] Intento SQLi en /api/auth/login -> 400 {"error":"VALIDATION_ERROR","message":"Correo electrónico no válido"}
+[A01] Acceso anónimo a /api/admin/users -> 401 {"error":"UNAUTHENTICATED","message":"Debes iniciar sesión."}
+[A08] Atributo integrity (SRI SHA-384) presente en HTML -> true
+```
+
+### 4.2 Escaneos externos recomendados para adjuntar captura en el informe final
+
+| Herramienta | Enlace directo sobre producción | Meta esperada |
+|---|---|---|
+| **Security Headers** | https://securityheaders.com/?q=https%3A%2F%2Fsecurevault-gamma.vercel.app&followRedirects=on | Calificación **A / A+** |
+| **Qualys SSL Labs** | https://www.ssllabs.com/ssltest/analyze.html?d=securevault-gamma.vercel.app | Calificación **A / A+** (TLS 1.2/1.3) |
+| **OWASP ZAP Baseline** | Ejecutar ZAP contra `https://securevault-gamma.vercel.app` | 0 alertas High/Critical |
 
 ---
 
