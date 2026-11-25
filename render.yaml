@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: securevault
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: DB_SSL_REJECT_UNAUTHORIZED
+        value: "true"
+      - key: ACTIVE_ENCRYPTION_KEY_VERSION
+        value: "1"
+      # Secretos gestionados exclusivamente en el panel de Render (nunca en Git)
+      - key: DATABASE_URL
+        sync: false
+      - key: DATA_ENCRYPTION_KEY
+        sync: false
+      - key: HMAC_SECRET
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: ALERT_WEBHOOK_URL
+        sync: false
