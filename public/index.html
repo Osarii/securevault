@@ -19,12 +19,20 @@
   <body>
     <a class="skip-link" href="#main-content">Ir al contenido principal</a>
 
+    <!-- Magic UI Subtle Ambient Dot Pattern & Glass Orbs -->
+    <div class="ambient-scene" aria-hidden="true">
+      <div class="ambient-dots"></div>
+      <div class="ambient-orb orb-sapphire"></div>
+      <div class="ambient-orb orb-emerald"></div>
+      <div class="ambient-orb orb-indigo"></div>
+    </div>
+
     <!-- Authentication Screen -->
     <main id="auth-screen" class="auth-screen" aria-label="Acceso a SecureVault">
       <div class="auth-shell">
         <header class="auth-brand">
           <div class="vault-emblem" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <rect x="4" y="11" width="16" height="10" rx="3" />
               <path d="M8 11V7a4 4 0 0 1 8 0v4" />
               <circle cx="12" cy="16" r="1.25" fill="currentColor" stroke="none" />
@@ -34,8 +42,10 @@
           <p class="auth-subtitle">Bóveda cifrada para notas privadas y datos sensibles.</p>
         </header>
 
-        <section class="auth-card" aria-live="polite">
-          <!-- Apple-style Segmented Control with spring thumb -->
+        <section class="auth-card magic-surface" data-spotlight aria-live="polite">
+          <!-- Magic UI Border Beam -->
+          <div class="border-beam" aria-hidden="true"></div>
+
           <div id="auth-segmented" class="segmented-control" role="tablist" aria-label="Modo de acceso">
             <div class="segmented-thumb" aria-hidden="true"></div>
             <button type="button" class="segmented-btn is-active" role="tab" aria-selected="true" data-auth-tab="login">
@@ -61,8 +71,8 @@
               <label for="login-password">Contraseña</label>
               <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required />
             </div>
-            <button type="submit" class="btn btn-primary btn-full" id="login-submit">
-              Desbloquear bóveda
+            <button type="submit" class="btn btn-primary btn-shimmer btn-full" id="login-submit">
+              <span>Desbloquear bóveda</span>
             </button>
           </form>
 
@@ -88,7 +98,9 @@
             </div>
             <div class="form-actions-row">
               <button type="button" class="btn btn-secondary" id="mfa-back-btn">Volver</button>
-              <button type="submit" class="btn btn-primary" id="mfa-verify-btn">Verificar y entrar</button>
+              <button type="submit" class="btn btn-primary btn-shimmer" id="mfa-verify-btn">
+                <span>Verificar y entrar</span>
+              </button>
             </div>
           </form>
 
@@ -118,8 +130,8 @@
                 <li data-rule="symbol">Símbolo</li>
               </ul>
             </div>
-            <button type="submit" class="btn btn-primary btn-full" id="register-submit">
-              Crear bóveda personal
+            <button type="submit" class="btn btn-primary btn-shimmer btn-full" id="register-submit">
+              <span>Crear bóveda personal</span>
             </button>
           </form>
 
@@ -144,7 +156,9 @@
                 <label for="reset-password">Nueva contraseña</label>
                 <input id="reset-password" name="newPassword" type="password" autocomplete="new-password" placeholder="Mínimo 12 caracteres seguros" required />
               </div>
-              <button type="submit" class="btn btn-primary btn-full">Restablecer contraseña</button>
+              <button type="submit" class="btn btn-primary btn-shimmer btn-full">
+                <span>Restablecer contraseña</span>
+              </button>
             </form>
           </div>
         </section>
@@ -154,182 +168,379 @@
             <span class="status-dot" aria-hidden="true"></span>
             <span id="auth-health-text">Verificando estado...</span>
           </div>
-          <button type="button" class="btn-icon theme-toggle-btn" aria-label="Cambiar apariencia claro u oscuro" title="Cambiar apariencia">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-            </svg>
-          </button>
+          <!-- Uiverse Glass Theme Switch -->
+          <label class="uiverse-switch" title="Cambiar apariencia claro u oscuro">
+            <input type="checkbox" class="theme-switch-input" aria-label="Alternar modo oscuro" />
+            <span class="uiverse-slider">
+              <svg class="switch-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+              <svg class="switch-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg>
+            </span>
+          </label>
         </footer>
       </div>
     </main>
 
-    <!-- Authenticated Workspace -->
+    <!-- Authenticated macOS Sequoia + Magic UI + 21st.dev Workspace -->
     <div id="app-shell" class="app-shell" hidden>
-      <!-- Translucent macOS-style Sidebar -->
+      <!-- Floating Collapsible Glass Sidebar -->
       <aside class="sidebar" aria-label="Navegación principal">
         <div class="sidebar-header">
           <div class="brand-inline">
             <span class="vault-emblem-sm" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="4" y="11" width="16" height="10" rx="3" />
                 <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                <circle cx="12" cy="16" r="1.15" fill="currentColor" stroke="none" />
               </svg>
             </span>
-            <span class="brand-name">SecureVault</span>
+            <div class="brand-stack">
+              <span class="brand-name">SecureVault</span>
+              <span class="brand-caption">Bóveda AES-256</span>
+            </div>
           </div>
-          <button type="button" class="btn-icon theme-toggle-btn" aria-label="Cambiar apariencia claro u oscuro" title="Cambiar apariencia">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+
+          <button type="button" class="btn-icon" id="sidebar-collapse-btn" aria-label="Contraer o expandir barra lateral" aria-expanded="true" title="Contraer barra lateral">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="16" rx="3" />
+              <line x1="9" y1="4" x2="9" y2="20" />
             </svg>
           </button>
         </div>
 
         <nav class="sidebar-nav" aria-label="Secciones de la bóveda">
-          <button type="button" class="nav-item is-active" data-view="notes">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
-              <path d="M14 3v6h6M8 13h8M8 17h5" />
-            </svg>
-            <span>Notas privadas</span>
+          <button type="button" class="nav-item is-active" data-view="notes" title="Notas privadas">
+            <span class="nav-icon-box icon-blue" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 3h8l5 5v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+                <path d="M14 3v5h5M9 13h6M9 17h4" />
+              </svg>
+            </span>
+            <span class="nav-label">Notas privadas</span>
             <span id="sidebar-notes-count" class="nav-badge">0</span>
           </button>
 
-          <button type="button" class="nav-item" data-view="profile">
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M12 2l7 3v6c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V5l7-3z" />
-              <path d="M9.5 12.5l1.8 1.8 3.7-4" />
-            </svg>
-            <span>Perfil y seguridad</span>
+          <button type="button" class="nav-item" data-view="profile" title="Perfil y seguridad">
+            <span class="nav-icon-box icon-green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2.5l7 3v5.8c0 4.8-3.2 8.9-7 10.2-3.8-1.3-7-5.4-7-10.2V5.5l7-3z" />
+                <path d="M9.5 12.2l1.8 1.8 3.6-3.8" />
+              </svg>
+            </span>
+            <span class="nav-label">Perfil y seguridad</span>
           </button>
 
-          <button type="button" class="nav-item" data-view="admin" id="nav-admin-btn" hidden>
-            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 5h18M3 12h18M3 19h18" />
-              <circle cx="8" cy="5" r="2" fill="var(--canvas)" />
-              <circle cx="16" cy="12" r="2" fill="var(--canvas)" />
-              <circle cx="10" cy="19" r="2" fill="var(--canvas)" />
-            </svg>
-            <span>Administración</span>
+          <button type="button" class="nav-item" data-view="admin" id="nav-admin-btn" title="Administración" hidden>
+            <span class="nav-icon-box icon-indigo" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+                <circle cx="9" cy="6" r="2.1" fill="currentColor" />
+                <circle cx="15" cy="12" r="2.1" fill="currentColor" />
+                <circle cx="10" cy="18" r="2.1" fill="currentColor" />
+              </svg>
+            </span>
+            <span class="nav-label">Administración</span>
           </button>
         </nav>
+
+        <!-- Magic Spotlight Vault Telemetry Card -->
+        <div class="sidebar-vault-card magic-surface" data-spotlight>
+          <div class="vault-card-row">
+            <span class="status-pill" id="app-health-pill">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span id="app-health-text">Servicio activo</span>
+            </span>
+            <span class="vault-cipher-tag">GCM</span>
+          </div>
+          <div class="quota-track" aria-hidden="true">
+            <div id="sidebar-quota-fill" class="quota-fill"></div>
+          </div>
+          <div class="vault-card-bottom">
+            <span id="sidebar-quota-caption" class="quota-caption">0 de 50 notas</span>
+            <!-- Uiverse Glass Theme Switch -->
+            <label class="uiverse-switch" title="Cambiar apariencia claro u oscuro">
+              <input type="checkbox" class="theme-switch-input" aria-label="Alternar modo oscuro" />
+              <span class="uiverse-slider">
+                <svg class="switch-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                </svg>
+                <svg class="switch-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              </span>
+            </label>
+          </div>
+        </div>
 
         <div class="sidebar-footer">
           <div class="user-chip">
             <div class="user-avatar" id="sidebar-avatar" aria-hidden="true">U</div>
             <div class="user-meta">
               <div class="user-name" id="sidebar-user-name">Usuario</div>
-              <div class="user-role" id="sidebar-user-role">usuario</div>
+              <div class="user-role" id="sidebar-user-role">Usuario</div>
             </div>
           </div>
-
-          <div class="sidebar-footer-actions">
-            <div class="status-pill" id="app-health-pill">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span id="app-health-text">Servicio activo</span>
-            </div>
-            <button type="button" class="btn-link-danger" id="logout-btn">Cerrar sesión</button>
-          </div>
+          <button type="button" class="btn-signout" id="logout-btn" title="Cerrar sesión">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span class="signout-label">Cerrar sesión</span>
+          </button>
         </div>
       </aside>
 
       <!-- Main Workspace -->
       <main id="main-content" class="workspace">
-        <!-- View 1: Encrypted Notes (Master-Detail like Apple Notes) -->
+        <!-- View 1: Encrypted Notes -->
         <section id="view-notes" class="view-section">
-          <header class="floating-toolbar">
-            <div class="toolbar-leading">
-              <h1>Notas privadas</h1>
-              <span class="toolbar-meta" id="notes-quota-label">0 de 50 notas</span>
-            </div>
-            <div class="toolbar-actions">
-              <input type="search" id="notes-search" class="search-field" placeholder="Buscar notas" aria-label="Buscar notas" />
-              <button type="button" class="btn btn-primary" id="new-note-btn">Nueva nota</button>
-            </div>
-          </header>
-
-          <div class="notes-split">
-            <div class="notes-list-pane" aria-label="Lista de notas">
-              <ul id="notes-list" class="notes-list"></ul>
-              <div id="notes-empty-list" class="empty-state" hidden>
-                <p class="empty-title">Sin notas cifradas</p>
-                <p class="empty-desc">Crea tu primera nota privada. El contenido se cifra con AES-256-GCM antes de guardarse.</p>
-                <button type="button" class="btn btn-primary" id="empty-create-note-btn">Crear primera nota</button>
+          <header class="workspace-header">
+            <div class="header-top">
+              <div class="toolbar-leading">
+                <h1>Notas privadas</h1>
+                <span class="toolbar-meta" id="notes-quota-label">0 de 50 notas · Cifrado autenticado en reposo</span>
+              </div>
+              <div class="toolbar-actions">
+                <div class="search-wrap">
+                  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M20 20l-3.5-3.5" />
+                  </svg>
+                  <input type="search" id="notes-search" class="search-field" placeholder="Buscar en tu bóveda" aria-label="Buscar notas" />
+                </div>
+                <button type="button" class="btn btn-primary btn-shimmer" id="new-note-btn">
+                  <svg class="btn-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  <span>Nueva nota</span>
+                </button>
               </div>
             </div>
 
-            <div class="notes-editor-pane">
-              <form id="note-editor-form" class="note-editor" novalidate>
-                <div class="editor-meta-bar">
-                  <span id="editor-crypto-pill" class="crypto-pill">AES-256-GCM · IV único</span>
-                  <span id="editor-char-count" class="char-counter">0 / 10,000</span>
+            <!-- 21st.dev + Magic UI Pointer-Spotlight Security Posture Tiles -->
+            <div class="posture-strip" aria-label="Estado rápido de tu bóveda">
+              <button type="button" class="posture-tile magic-surface spot-blue" data-spotlight id="tile-notes-shortcut">
+                <span class="tile-icon icon-blue" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4" y="11" width="16" height="10" rx="3" />
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                  </svg>
+                </span>
+                <div class="tile-copy">
+                  <span class="tile-value" id="tile-notes-value">0 notas cifradas</span>
+                  <span class="tile-label">AES-256-GCM · IV único 96-bit</span>
+                </div>
+              </button>
+
+              <button type="button" class="posture-tile magic-surface spot-indigo" data-spotlight id="tile-mfa-shortcut">
+                <span class="tile-icon icon-indigo" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2.5l7 3v5.8c0 4.8-3.2 8.9-7 10.2-3.8-1.3-7-5.4-7-10.2V5.5l7-3z" />
+                    <path d="M12 8v4l2.5 1.5" />
+                  </svg>
+                </span>
+                <div class="tile-copy">
+                  <span class="tile-value" id="tile-mfa-value">MFA desactivado</span>
+                  <span class="tile-label" id="tile-mfa-sub">Activar códigos TOTP</span>
+                </div>
+              </button>
+
+              <button type="button" class="posture-tile magic-surface spot-green" data-spotlight id="tile-phone-shortcut">
+                <span class="tile-icon icon-green" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                </span>
+                <div class="tile-copy">
+                  <span class="tile-value mono-inline" id="tile-phone-value">Sin dato sensible</span>
+                  <span class="tile-label">Enmascarado · Revelación auditada</span>
+                </div>
+              </button>
+            </div>
+          </header>
+
+          <!-- Elevated macOS Notes Master-Detail with Magic UI Border Beam -->
+          <div class="vault-stage">
+            <div class="notes-split-card magic-surface" data-spotlight>
+              <div class="border-beam border-beam-subtle" aria-hidden="true"></div>
+
+              <!-- Left Pane: Notes List -->
+              <div class="notes-list-pane" aria-label="Lista de notas">
+                <div class="list-pane-header">
+                  <span class="list-pane-title">Todas las notas</span>
+                  <span class="list-pane-count" id="list-pane-count">0</span>
                 </div>
 
-                <input
-                  type="text"
-                  id="note-title-input"
-                  class="editor-title"
-                  placeholder="Título de la nota"
-                  maxlength="150"
-                  required
-                />
+                <ul id="notes-list" class="notes-list"></ul>
 
-                <textarea
-                  id="note-content-input"
-                  class="editor-textarea"
-                  placeholder="Escribe aquí información confidencial. Solo tu cuenta puede descifrarla."
-                  maxlength="10000"
-                  required
-                ></textarea>
-
-                <div class="editor-footer">
-                  <span id="editor-updated-at" class="editor-timestamp">Sin guardar</span>
-                  <div class="editor-buttons">
-                    <button type="button" class="btn btn-danger-subtle" id="delete-note-btn" hidden>
-                      Eliminar
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="save-note-btn">
-                      Guardar nota
-                    </button>
+                <div id="notes-empty-list" class="empty-state" hidden>
+                  <div class="empty-glyph" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="4" y="11" width="16" height="10" rx="3" />
+                      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                    </svg>
                   </div>
+                  <p class="empty-title">Tu bóveda está vacía</p>
+                  <p class="empty-desc">Escribe a la derecha o usa una plantilla rápida para guardar tu primera nota cifrada.</p>
                 </div>
-              </form>
+              </div>
+
+              <!-- Right Pane: Elevated Editor Sheet -->
+              <div class="notes-editor-pane">
+                <form id="note-editor-form" class="note-editor" novalidate>
+                  <div class="editor-meta-bar">
+                    <div class="editor-badges">
+                      <!-- Magic UI Animated Shiny Badge -->
+                      <span id="editor-crypto-pill" class="crypto-pill shiny-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <rect x="4" y="11" width="16" height="10" rx="3" />
+                          <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                        </svg>
+                        <span id="editor-crypto-text" class="shiny-text">AES-256-GCM · IV único</span>
+                      </span>
+                      <button type="button" class="pill-toggle" id="inspect-crypto-btn" aria-expanded="false" hidden>
+                        Inspeccionar integridad
+                      </button>
+                    </div>
+                    <div class="editor-tools">
+                      <span id="editor-char-count" class="char-counter">0 / 10,000</span>
+                      <button type="button" class="btn-icon-sm" id="copy-note-btn" title="Copiar contenido" aria-label="Copiar contenido de la nota">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="9" y="9" width="11" height="11" rx="2" />
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Collapsible Cryptographic Integrity Inspector Drawer -->
+                  <div id="crypto-inspector" class="crypto-inspector" hidden>
+                    <div class="inspector-item">
+                      <span class="inspector-k">Algoritmo</span>
+                      <span class="inspector-v">AES-256-GCM (IV 12B + Tag 16B)</span>
+                    </div>
+                    <div class="inspector-item">
+                      <span class="inspector-k">Llave</span>
+                      <span class="inspector-v" id="inspector-key-version">v1</span>
+                    </div>
+                    <div class="inspector-item">
+                      <span class="inspector-k">Firma HMAC-SHA256</span>
+                      <span class="inspector-v" id="inspector-mac">—</span>
+                    </div>
+                  </div>
+
+                  <!-- Quick Templates Bar -->
+                  <div id="quick-templates-bar" class="templates-bar" aria-label="Plantillas rápidas">
+                    <span class="templates-label">Plantillas:</span>
+                    <button type="button" class="template-chip" data-template="recovery">Códigos de respaldo</button>
+                    <button type="button" class="template-chip" data-template="wifi">Red Wi-Fi privada</button>
+                    <button type="button" class="template-chip" data-template="document">Datos de documento</button>
+                  </div>
+
+                  <input
+                    type="text"
+                    id="note-title-input"
+                    class="editor-title"
+                    placeholder="Título de la nota"
+                    maxlength="150"
+                    required
+                  />
+
+                  <textarea
+                    id="note-content-input"
+                    class="editor-textarea"
+                    placeholder="Escribe aquí información confidencial. Cada guardado genera un vector de inicialización (IV) único de 12 bytes antes de cifrarse con AES-256-GCM."
+                    maxlength="10000"
+                    required
+                  ></textarea>
+
+                  <div class="editor-footer">
+                    <span id="editor-updated-at" class="editor-timestamp">Borrador sin guardar</span>
+                    <div class="editor-buttons">
+                      <button type="button" class="btn btn-danger-subtle" id="delete-note-btn" hidden>
+                        Eliminar
+                      </button>
+                      <button type="submit" class="btn btn-primary btn-shimmer" id="save-note-btn">
+                        <span>Guardar y cifrar</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </section>
 
         <!-- View 2: Profile, Sensitive Data & MFA TOTP -->
         <section id="view-profile" class="view-section" hidden>
-          <header class="floating-toolbar">
-            <div class="toolbar-leading">
-              <h1>Perfil y seguridad</h1>
-              <span class="toolbar-meta">Datos cifrados y autenticación en dos pasos</span>
+          <header class="workspace-header">
+            <div class="header-top">
+              <div class="toolbar-leading">
+                <h1>Perfil y seguridad</h1>
+                <span class="toolbar-meta">Identidad, dato sensible cifrado y segundo factor TOTP</span>
+              </div>
             </div>
           </header>
 
           <div class="settings-container">
+            <div class="identity-banner magic-surface" data-spotlight>
+              <div class="border-beam border-beam-subtle" aria-hidden="true"></div>
+              <div class="identity-avatar-lg" id="profile-avatar-lg" aria-hidden="true">U</div>
+              <div class="identity-copy">
+                <h2 id="profile-banner-name">Usuario</h2>
+                <p id="profile-email-display" class="identity-email"></p>
+                <div class="identity-pills">
+                  <span class="crypto-pill">Argon2id</span>
+                  <span class="status-badge" id="profile-role-pill">Usuario</span>
+                  <span class="status-badge" id="profile-mfa-pill">MFA desactivado</span>
+                </div>
+              </div>
+            </div>
+
             <section class="settings-group" aria-labelledby="profile-heading">
-              <h2 id="profile-heading" class="group-title">Identidad y dato sensible</h2>
+              <h2 id="profile-heading" class="group-title">Información personal y dato sensible</h2>
               <form id="profile-form" class="inset-panel" novalidate>
                 <div class="inset-row">
-                  <div class="row-info">
-                    <label for="profile-name">Nombre</label>
-                    <span class="row-sub" id="profile-email-display"></span>
+                  <div class="row-leading">
+                    <span class="settings-icon icon-blue" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M5 20a7 7 0 0 1 14 0" />
+                      </svg>
+                    </span>
+                    <div class="row-info">
+                      <label for="profile-name">Nombre visible</label>
+                      <span class="row-sub">Se muestra en tu bóveda y auditoría.</span>
+                    </div>
                   </div>
                   <input id="profile-name" type="text" class="inset-input" required />
                 </div>
 
                 <div class="inset-row">
-                  <div class="row-info">
-                    <label for="profile-phone">Teléfono o documento</label>
-                    <span class="row-sub">
-                      Valor actual:
-                      <strong id="profile-phone-masked" class="mono-inline">No registrado</strong>
+                  <div class="row-leading">
+                    <span class="settings-icon icon-green" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="4" y="11" width="16" height="10" rx="3" />
+                        <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                      </svg>
                     </span>
+                    <div class="row-info">
+                      <label for="profile-phone">Teléfono o documento</label>
+                      <span class="row-sub">
+                        Guardado:
+                        <strong id="profile-phone-masked" class="mono-inline">No registrado</strong>
+                      </span>
+                    </div>
                   </div>
                   <div class="sensitive-controls">
-                    <input id="profile-phone" type="text" class="inset-input" placeholder="Actualizar valor cifrado" />
+                    <input id="profile-phone" type="text" class="inset-input" placeholder="Nuevo teléfono o documento" />
                     <button type="button" class="btn btn-secondary" id="reveal-phone-btn" hidden>
                       Revelar
                     </button>
@@ -337,23 +548,35 @@
                 </div>
 
                 <div class="inset-row inset-row-actions">
-                  <span class="row-sub">El dato sensible se cifra con AES-256-GCM y cada revelación queda auditada.</span>
-                  <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                  <span class="row-sub">Cifrado en BD con AES-256-GCM; cada revelación temporal queda registrada en la bitácora.</span>
+                  <button type="submit" class="btn btn-primary btn-shimmer">
+                    <span>Guardar cambios</span>
+                  </button>
                 </div>
               </form>
             </section>
 
             <section class="settings-group" aria-labelledby="mfa-heading">
-              <h2 id="mfa-heading" class="group-title">Verificación en dos pasos (TOTP)</h2>
+              <h2 id="mfa-heading" class="group-title">Autenticación en dos pasos</h2>
               <div class="inset-panel">
                 <div class="inset-row">
-                  <div class="row-info">
-                    <span class="row-label">Aplicación autenticadora (RFC 6238)</span>
-                    <span class="row-sub" id="mfa-status-desc">Protege tu bóveda con códigos temporales de 6 dígitos.</span>
+                  <div class="row-leading">
+                    <span class="settings-icon icon-indigo" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2.5l7 3v5.8c0 4.8-3.2 8.9-7 10.2-3.8-1.3-7-5.4-7-10.2V5.5l7-3z" />
+                        <path d="M9.5 12.2l1.8 1.8 3.6-3.8" />
+                      </svg>
+                    </span>
+                    <div class="row-info">
+                      <span class="row-label">Aplicación autenticadora (TOTP · RFC 6238)</span>
+                      <span class="row-sub" id="mfa-status-desc">Protege tu bóveda con códigos temporales de 6 dígitos cada 30 segundos.</span>
+                    </div>
                   </div>
                   <div class="mfa-action-group">
                     <span id="mfa-status-badge" class="status-badge">Desactivado</span>
-                    <button type="button" class="btn btn-primary" id="mfa-setup-btn">Configurar</button>
+                    <button type="button" class="btn btn-primary btn-shimmer" id="mfa-setup-btn">
+                      <span>Configurar</span>
+                    </button>
                     <button type="button" class="btn btn-danger-subtle" id="mfa-disable-open-btn" hidden>Desactivar</button>
                   </div>
                 </div>
@@ -364,13 +587,15 @@
 
         <!-- View 3: Admin Panel (RF-07) -->
         <section id="view-admin" class="view-section" hidden>
-          <header class="floating-toolbar">
-            <div class="toolbar-leading">
-              <h1>Administración</h1>
-              <span class="toolbar-meta">Usuarios, bitácora de seguridad y gestión criptográfica</span>
-            </div>
-            <div class="toolbar-actions">
-              <button type="button" class="btn btn-secondary" id="admin-refresh-btn">Actualizar</button>
+          <header class="workspace-header">
+            <div class="header-top">
+              <div class="toolbar-leading">
+                <h1>Administración</h1>
+                <span class="toolbar-meta">Control de accesos, bitácora JSON de seguridad y rotación criptográfica</span>
+              </div>
+              <div class="toolbar-actions">
+                <button type="button" class="btn btn-secondary" id="admin-refresh-btn">Actualizar datos</button>
+              </div>
             </div>
           </header>
 
@@ -388,7 +613,6 @@
               </button>
             </div>
 
-            <!-- Admin Users Table -->
             <div id="admin-tab-users" class="admin-pane">
               <div class="table-surface">
                 <table class="data-table">
@@ -407,7 +631,6 @@
               </div>
             </div>
 
-            <!-- Admin Audit Logs Table -->
             <div id="admin-tab-logs" class="admin-pane" hidden>
               <div class="filter-bar">
                 <label for="audit-filter-select" class="sr-only">Filtrar por tipo de evento</label>
@@ -441,16 +664,23 @@
               </div>
             </div>
 
-            <!-- Admin Alerts & Key Rotation -->
             <div id="admin-tab-alerts" class="admin-pane" hidden>
               <div class="inset-panel key-rotation-panel">
                 <div class="inset-row">
-                  <div class="row-info">
-                    <span class="row-label">Rotación de llaves AES-256-GCM</span>
-                    <span class="row-sub" id="key-version-info">Versión activa: v1</span>
+                  <div class="row-leading">
+                    <span class="settings-icon icon-amber" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="8" cy="14" r="4" />
+                        <path d="M11 11l9-9M17 5l2 2M14 8l2 2" />
+                      </svg>
+                    </span>
+                    <div class="row-info">
+                      <span class="row-label">Rotación de llaves AES-256-GCM</span>
+                      <span class="row-sub" id="key-version-info">Versión activa: v1</span>
+                    </div>
                   </div>
-                  <button type="button" class="btn btn-primary" id="rotate-keys-btn">
-                    Re-cifrar registros antiguos
+                  <button type="button" class="btn btn-primary btn-shimmer" id="rotate-keys-btn">
+                    <span>Re-cifrar registros antiguos</span>
                   </button>
                 </div>
               </div>
@@ -476,7 +706,7 @@
       </main>
     </div>
 
-    <!-- Spring-driven Interactive Sheet (Drag-to-dismiss + velocity projection) -->
+    <!-- Spring-driven Interactive Sheet -->
     <div id="sheet-backdrop" class="sheet-backdrop" hidden>
       <div id="sheet-panel" class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
         <div id="sheet-drag-handle" class="sheet-handle-area" aria-hidden="true">
@@ -487,7 +717,7 @@
       </div>
     </div>
 
-    <!-- Non-blocking Toast -->
+    <!-- Floating Pill Toast -->
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   </body>
 </html>

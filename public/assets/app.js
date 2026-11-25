@@ -1,4 +1,5 @@
 import { bindSegmentedThumb, createInteractiveSheet } from './spring.js';
+import { initMagicSpotlights, initSidebarCollapse } from './magic.js';
 
 const state = {
   user: null,
@@ -11,10 +12,25 @@ const state = {
   toastTimer: null,
 };
 
+const NOTE_TEMPLATES = {
+  recovery: {
+    title: 'Códigos de respaldo de cuentas',
+    content:
+      'Servicio: \nCuenta: \nCódigos de recuperación de un solo uso:\n- \n- \n- \nÚltima verificación: ',
+  },
+  wifi: {
+    title: 'Credenciales de red Wi-Fi privada',
+    content: 'SSID: \nSeguridad: WPA3-Personal\nContraseña: \nRouter (IP local): 192.168.1.1\nNotas: ',
+  },
+  document: {
+    title: 'Referencia de documento oficial',
+    content: 'Tipo de documento: \nNúmero / Folio: \nVigencia: \nUbicación física: ',
+  },
+};
+
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-// Defense-in-depth sanitization using SRI-verified DOMPurify when available + strict textContent rendering
 function cleanText(val) {
   const str = String(val ?? '');
   if (window.DOMPurify) {
@@ -105,24 +121,33 @@ function formatDate(iso) {
   });
 }
 
-// Theme toggle (Apple light/dark adaptive)
 function initTheme() {
   const saved = localStorage.getItem('sv_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initialDark = saved ? saved === 'dark' : prefersDark;
+
   if (saved === 'light' || saved === 'dark') {
     document.documentElement.dataset.theme = saved;
   }
-  $$('.theme-toggle-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const current = document.documentElement.dataset.theme || (prefersDark ? 'dark' : 'light');
-      const next = current === 'dark' ? 'light' : 'dark';
+
+  const switches = $$('.theme-switch-input');
+  const syncSwitches = (isDark) => {
+    switches.forEach((inp) => {
+      inp.checked = isDark;
+    });
+  };
+  syncSwitches(initialDark);
+
+  switches.forEach((inp) => {
+    inp.addEventListener('change', () => {
+      const next = inp.checked ? 'dark' : 'light';
       document.documentElement.dataset.theme = next;
       localStorage.setItem('sv_theme', next);
+      syncSwitches(inp.checked);
     });
   });
 }
 
-// RF-08: Poll /health status without revealing internal info
 async function checkHealth() {
   const pills = [
     { pill: $('#auth-health-pill'), text: $('#auth-health-text') },
@@ -148,7 +173,6 @@ async function checkHealth() {
   }
 }
 
-// Interactive Sheet instance
 const sheet = createInteractiveSheet($('#sheet-backdrop'), $('#sheet-panel'), $('#sheet-drag-handle'));
 
 function openSheet({ title, buildBody }) {
@@ -159,7 +183,6 @@ function openSheet({ title, buildBody }) {
   sheet.open();
 }
 
-// Segmented controllers
 const authSegmented = bindSegmentedThumb($('#auth-segmented'));
 const adminSegmented = bindSegmentedThumb($('#admin-segmented'));
 
@@ -189,7 +212,6 @@ function setAdminTab(tab) {
   adminSegmented.sync(false);
 }
 
-// Inline password strength feedback
 function bindPasswordStrength() {
   const input = $('#reg-password');
   const rules = {
@@ -209,7 +231,28 @@ function bindPasswordStrength() {
   });
 }
 
-// Navigation between main views
+function updatePostureUI() {
+  if (!state.user) return;
+  const count = state.notes.length;
+  const max = state.noteLimits.maxNotes || 50;
+  const pct = Math.min(100, Math.round((count / max) * 100));
+
+  $('#sidebar-notes-count').textContent = String(count);
+  $('#list-pane-count').textContent = String(count);
+  $('#notes-quota-label').textContent = `${count} de ${max} notas · Cifrado autenticado en reposo`;
+  $('#sidebar-quota-caption').textContent = `${count} de ${max} notas`;
+  $('#sidebar-quota-fill').style.width = `${pct}%`;
+
+  $('#tile-notes-value').textContent = count === 1 ? '1 nota cifrada' : `${count} notas cifradas`;
+
+  $('#tile-mfa-value').textContent = state.user.mfaEnabled ? 'MFA TOTP activo' : 'MFA desactivado';
+  $('#tile-mfa-sub').textContent = state.user.mfaEnabled
+    ? 'Protegido con RFC 6238'
+    : 'Recomendado · Configurar';
+
+  $('#tile-phone-value').textContent = state.user.phoneMasked || 'Sin dato sensible';
+}
+
 function switchView(viewName) {
   $$('.nav-item').forEach((btn) => {
     btn.classList.toggle('is-active', btn.dataset.view === viewName);
@@ -225,7 +268,6 @@ function switchView(viewName) {
   }
 }
 
-// Notes rendering & editing
 function renderNotesList() {
   const list = $('#notes-list');
   const empty = $('#notes-empty-list');
@@ -235,8 +277,7 @@ function renderNotesList() {
     (n) => n.title.toLowerCase().includes(query) || n.content.toLowerCase().includes(query)
   );
 
-  $('#sidebar-notes-count').textContent = String(state.notes.length);
-  $('#notes-quota-label').textContent = `${state.notes.length} de ${state.noteLimits.maxNotes} notas`;
+  updatePostureUI();
 
   list.textContent = '';
   empty.hidden = filtered.length > 0;
@@ -256,7 +297,7 @@ function renderNotesList() {
 
     const previewEl = document.createElement('span');
     previewEl.className = 'note-item-preview';
-    previewEl.textContent = note.content.slice(0, 72);
+    previewEl.textContent = note.content.slice(0, 96);
 
     const metaEl = document.createElement('span');
     metaEl.className = 'note-item-meta';
@@ -280,12 +321,16 @@ function selectNote(noteId) {
   state.selectedNoteId = note.id;
   state.isCreatingNewNote = false;
 
+  $('#quick-templates-bar').hidden = true;
+  $('#inspect-crypto-btn').hidden = false;
+  $('#inspector-key-version').textContent = `v${note.keyVersion}`;
+  $('#inspector-mac').textContent = note.integrityMac || '—';
   $('#note-title-input').value = note.title;
   $('#note-content-input').value = note.content;
-  $('#editor-crypto-pill').textContent = `AES-256-GCM · Llave v${note.keyVersion}`;
-  $('#editor-updated-at').textContent = `Actualizada: ${formatDate(note.updatedAt)}`;
+  $('#editor-crypto-text').textContent = `AES-256-GCM · Llave v${note.keyVersion}`;
+  $('#editor-updated-at').textContent = `Guardada ${formatDate(note.updatedAt)}`;
   $('#delete-note-btn').hidden = false;
-  $('#save-note-btn').textContent = 'Guardar cambios';
+  $('#save-note-btn span').textContent = 'Guardar cambios';
   updateCharCounter();
   renderNotesList();
 }
@@ -293,12 +338,16 @@ function selectNote(noteId) {
 function startNewNote() {
   state.isCreatingNewNote = true;
   state.selectedNoteId = null;
+  $('#quick-templates-bar').hidden = false;
+  $('#inspect-crypto-btn').hidden = true;
+  $('#crypto-inspector').hidden = true;
+  $('#inspect-crypto-btn').setAttribute('aria-expanded', 'false');
   $('#note-title-input').value = '';
   $('#note-content-input').value = '';
-  $('#editor-crypto-pill').textContent = 'AES-256-GCM · IV único al guardar';
-  $('#editor-updated-at').textContent = 'Nueva nota cifrada';
+  $('#editor-crypto-text').textContent = 'AES-256-GCM · IV único al guardar';
+  $('#editor-updated-at').textContent = 'Borrador sin guardar';
   $('#delete-note-btn').hidden = true;
-  $('#save-note-btn').textContent = 'Guardar nota';
+  $('#save-note-btn span').textContent = 'Guardar y cifrar';
   updateCharCounter();
   renderNotesList();
   $('#note-title-input').focus();
@@ -319,18 +368,32 @@ async function loadNotes() {
   }
 }
 
-// Profile & Sensitive Data (RF-05) + MFA TOTP
 async function loadProfile() {
   const { profile } = await api('/api/profile');
+  state.user = {
+    ...state.user,
+    name: profile.name,
+    mfaEnabled: profile.mfaEnabled,
+    phoneMasked: profile.phoneMasked,
+  };
+  updatePostureUI();
+
   $('#profile-name').value = profile.name;
+  $('#profile-banner-name').textContent = profile.name;
+  $('#profile-avatar-lg').textContent = (profile.name || 'U').slice(0, 1).toUpperCase();
   $('#profile-email-display').textContent = profile.email;
+  $('#profile-role-pill').textContent = profile.role === 'admin' ? 'Administrador' : 'Usuario';
   $('#profile-phone').value = '';
   $('#profile-phone-masked').textContent = profile.phoneMasked || 'No registrado';
   $('#reveal-phone-btn').hidden = !profile.hasSensitiveData;
 
   const badge = $('#mfa-status-badge');
+  const pill = $('#profile-mfa-pill');
   badge.textContent = profile.mfaEnabled ? 'Activo' : 'Desactivado';
   badge.classList.toggle('is-active', profile.mfaEnabled);
+  pill.textContent = profile.mfaEnabled ? 'MFA TOTP activo' : 'MFA desactivado';
+  pill.classList.toggle('is-active', profile.mfaEnabled);
+
   $('#mfa-setup-btn').hidden = profile.mfaEnabled;
   $('#mfa-disable-open-btn').hidden = !profile.mfaEnabled;
 }
@@ -342,7 +405,7 @@ async function openMfaSetupSheet() {
       title: 'Activar verificación en dos pasos',
       buildBody: (container) => {
         const p1 = document.createElement('p');
-        p1.textContent = 'Agrega esta clave secreta en Google Authenticator, 1Password o Apple Passwords:';
+        p1.textContent = 'Agrega esta clave secreta en Apple Passwords, 1Password o Google Authenticator:';
 
         const secretBox = document.createElement('div');
         secretBox.className = 'secret-box';
@@ -379,7 +442,7 @@ async function openMfaSetupSheet() {
 
         const confirmBtn = document.createElement('button');
         confirmBtn.type = 'submit';
-        confirmBtn.className = 'btn btn-primary';
+        confirmBtn.className = 'btn btn-primary btn-shimmer';
         confirmBtn.textContent = 'Activar MFA';
 
         actions.append(cancelBtn, confirmBtn);
@@ -465,7 +528,6 @@ function openMfaDisableSheet() {
   });
 }
 
-// Admin Panel (RF-07)
 async function loadAdminData() {
   const filter = $('#audit-filter-select').value;
   const logUrl = filter
@@ -627,7 +689,6 @@ async function loadAdminData() {
   }
 }
 
-// Enter authenticated app
 async function enterVault(user) {
   state.user = user;
   $('#auth-screen').hidden = true;
@@ -638,6 +699,7 @@ async function enterVault(user) {
   $('#sidebar-avatar').textContent = (user.name || 'U').slice(0, 1).toUpperCase();
   $('#nav-admin-btn').hidden = user.role !== 'admin';
 
+  updatePostureUI();
   switchView('notes');
   await loadNotes();
 }
@@ -653,7 +715,6 @@ function exitVault() {
   requestAnimationFrame(() => authSegmented.sync(true));
 }
 
-// Wire all event listeners (zero inline handlers — strict CSP!)
 function wireEvents() {
   $$('[data-auth-tab]').forEach((btn) => {
     btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab));
@@ -667,7 +728,42 @@ function wireEvents() {
     btn.addEventListener('click', () => switchView(btn.dataset.view));
   });
 
-  // Login
+  $('#tile-notes-shortcut').addEventListener('click', () => startNewNote());
+  $('#tile-mfa-shortcut').addEventListener('click', () => switchView('profile'));
+  $('#tile-phone-shortcut').addEventListener('click', () => switchView('profile'));
+
+  $('#inspect-crypto-btn').addEventListener('click', () => {
+    const panel = $('#crypto-inspector');
+    const nextHidden = !panel.hidden;
+    panel.hidden = nextHidden;
+    $('#inspect-crypto-btn').setAttribute('aria-expanded', String(!nextHidden));
+  });
+
+  $$('.template-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const tpl = NOTE_TEMPLATES[chip.dataset.template];
+      if (!tpl) return;
+      $('#note-title-input').value = tpl.title;
+      $('#note-content-input').value = tpl.content;
+      updateCharCounter();
+      $('#note-content-input').focus();
+    });
+  });
+
+  $('#copy-note-btn').addEventListener('click', async () => {
+    const content = $('#note-content-input').value;
+    if (!content) {
+      showToast('No hay contenido para copiar.', { isError: true });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(content);
+      showToast('Contenido copiado al portapapeles.');
+    } catch {
+      showToast('No fue posible acceder al portapapeles.', { isError: true });
+    }
+  });
+
   $('#login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     showAuthFeedback('');
@@ -698,7 +794,6 @@ function wireEvents() {
     }
   });
 
-  // MFA Login
   $('#mfa-back-btn').addEventListener('click', () => {
     $('#mfa-login-form').hidden = true;
     $('#login-form').hidden = false;
@@ -723,7 +818,6 @@ function wireEvents() {
     }
   });
 
-  // Register
   $('#register-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     showAuthFeedback('');
@@ -749,7 +843,6 @@ function wireEvents() {
     }
   });
 
-  // Recovery
   $('#forgot-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     showAuthFeedback('');
@@ -784,21 +877,18 @@ function wireEvents() {
     }
   });
 
-  // Logout
   $('#logout-btn').addEventListener('click', async () => {
     try {
       await api('/api/auth/logout', { method: 'POST' });
     } catch {
-      // Clear client state regardless
+      // Clear state regardless
     }
     exitVault();
     showToast('Sesión cerrada.');
   });
 
-  // Notes actions
   $('#notes-search').addEventListener('input', renderNotesList);
   $('#new-note-btn').addEventListener('click', startNewNote);
-  $('#empty-create-note-btn').addEventListener('click', startNewNote);
   $('#note-content-input').addEventListener('input', updateCharCounter);
 
   $('#note-editor-form').addEventListener('submit', async (e) => {
@@ -879,7 +969,6 @@ function wireEvents() {
     });
   });
 
-  // Profile
   $('#profile-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const payload = { name: $('#profile-name').value.trim() };
@@ -889,11 +978,15 @@ function wireEvents() {
     try {
       const { profile } = await api('/api/profile', { method: 'PATCH', body: payload });
       state.user.name = profile.name;
+      state.user.phoneMasked = profile.phoneMasked;
       $('#sidebar-user-name').textContent = profile.name;
       $('#sidebar-avatar').textContent = profile.name.slice(0, 1).toUpperCase();
+      $('#profile-banner-name').textContent = profile.name;
+      $('#profile-avatar-lg').textContent = profile.name.slice(0, 1).toUpperCase();
       $('#profile-phone').value = '';
       $('#profile-phone-masked').textContent = profile.phoneMasked || 'No registrado';
       $('#reveal-phone-btn').hidden = !profile.hasSensitiveData;
+      updatePostureUI();
       showToast('Perfil actualizado.');
     } catch (err) {
       showToast(err.message, { isError: true });
@@ -903,8 +996,7 @@ function wireEvents() {
   $('#reveal-phone-btn').addEventListener('click', async () => {
     try {
       const { phone } = await api('/api/profile/reveal', { method: 'POST' });
-      const maskedEl = $('#profile-phone-masked');
-      maskedEl.textContent = phone;
+      $('#profile-phone-masked').textContent = phone;
       showToast('Dato revelado temporalmente (15 s). Evento auditado.');
       clearTimeout(state.revealTimer);
       state.revealTimer = setTimeout(() => loadProfile().catch(() => {}), 15_000);
@@ -916,9 +1008,10 @@ function wireEvents() {
   $('#mfa-setup-btn').addEventListener('click', openMfaSetupSheet);
   $('#mfa-disable-open-btn').addEventListener('click', openMfaDisableSheet);
 
-  // Admin
   $('#admin-refresh-btn').addEventListener('click', () => {
-    loadAdminData().then(() => showToast('Datos actualizados.')).catch((err) => showToast(err.message, { isError: true }));
+    loadAdminData()
+      .then(() => showToast('Datos actualizados.'))
+      .catch((err) => showToast(err.message, { isError: true }));
   });
   $('#audit-filter-select').addEventListener('change', () => {
     loadAdminData().catch((err) => showToast(err.message, { isError: true }));
@@ -938,6 +1031,8 @@ function wireEvents() {
 
 async function bootstrap() {
   initTheme();
+  initMagicSpotlights();
+  initSidebarCollapse();
   bindPasswordStrength();
   wireEvents();
   checkHealth();
