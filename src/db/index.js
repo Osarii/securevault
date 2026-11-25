@@ -23,7 +23,16 @@ class PostgresAdapter {
     const useSsl =
       config.isProduction ||
       connectionString.includes('sslmode=require') ||
-      connectionString.includes('ssl=true');
+      connectionString.includes('ssl=true') ||
+      connectionString.includes('supabase.co') ||
+      connectionString.includes('supabase.com');
+
+    const sslConfig = useSsl
+      ? {
+          rejectUnauthorized: config.dbSslRejectUnauthorized,
+          ...(process.env.DB_SSL_CA ? { ca: process.env.DB_SSL_CA.replace(/\\n/g, '\n') } : {}),
+        }
+      : false;
 
     this.pool = new Pool({
       connectionString,
@@ -32,7 +41,7 @@ class PostgresAdapter {
       connectionTimeoutMillis: config.dbQueryTimeoutMs,
       statement_timeout: config.dbQueryTimeoutMs,
       query_timeout: config.dbQueryTimeoutMs,
-      ssl: useSsl ? { rejectUnauthorized: config.dbSslRejectUnauthorized } : false,
+      ssl: sslConfig,
     });
 
     this.pool.on('error', (err) => {

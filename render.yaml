@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: securevault
+    name: securevault-api
     runtime: node
     plan: free
     region: oregon
@@ -12,7 +12,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: TRUST_PROXY
-        value: "1"
+        value: "2"
       - key: COOKIE_SECURE
         value: "true"
       - key: DB_SSL_REJECT_UNAUTHORIZED
@@ -20,6 +20,7 @@ services:
       - key: ACTIVE_ENCRYPTION_KEY_VERSION
         value: "1"
       # Secretos gestionados exclusivamente en el panel de Render (nunca en Git)
+      # DATABASE_URL: cadena PostgreSQL Session Pooler de Supabase (puerto 5432, sslmode=require)
       - key: DATABASE_URL
         sync: false
       - key: DATA_ENCRYPTION_KEY
