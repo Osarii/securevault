@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>SecureVault — Bóveda privada cifrada</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <!-- OWASP A08: Subresource Integrity (SRI) verified with SHA-384 on external CDN script -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.4/purify.min.js"
+      integrity="sha384-eEu5CTj3qGvu9PdJuS+YlkNi7d2XxQROAFYOr59zgObtlcux1ae1Il3u7jvdCSWu"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+      defer
+    ></script>
+    <script type="module" src="/assets/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Ir al contenido principal</a>
+
+    <!-- Authentication Screen -->
+    <main id="auth-screen" class="auth-screen" aria-label="Acceso a SecureVault">
+      <div class="auth-shell">
+        <header class="auth-brand">
+          <div class="vault-emblem" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="11" width="16" height="10" rx="3" />
+              <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              <circle cx="12" cy="16" r="1.25" fill="currentColor" stroke="none" />
+            </svg>
+          </div>
+          <h1>SecureVault</h1>
+          <p class="auth-subtitle">Bóveda cifrada para notas privadas y datos sensibles.</p>
+        </header>
+
+        <section class="auth-card" aria-live="polite">
+          <!-- Apple-style Segmented Control with spring thumb -->
+          <div id="auth-segmented" class="segmented-control" role="tablist" aria-label="Modo de acceso">
+            <div class="segmented-thumb" aria-hidden="true"></div>
+            <button type="button" class="segmented-btn is-active" role="tab" aria-selected="true" data-auth-tab="login">
+              Iniciar sesión
+            </button>
+            <button type="button" class="segmented-btn" role="tab" aria-selected="false" data-auth-tab="register">
+              Crear cuenta
+            </button>
+            <button type="button" class="segmented-btn" role="tab" aria-selected="false" data-auth-tab="recovery">
+              Recuperar
+            </button>
+          </div>
+
+          <div id="auth-feedback" class="inline-alert" role="alert" hidden></div>
+
+          <!-- Login Form -->
+          <form id="login-form" class="auth-form" novalidate>
+            <div class="field-group">
+              <label for="login-email">Correo electrónico</label>
+              <input id="login-email" name="email" type="email" autocomplete="email" placeholder="nombre@ejemplo.com" required />
+            </div>
+            <div class="field-group">
+              <label for="login-password">Contraseña</label>
+              <input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Tu contraseña" required />
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="login-submit">
+              Desbloquear bóveda
+            </button>
+          </form>
+
+          <!-- MFA Challenge Form -->
+          <form id="mfa-login-form" class="auth-form" hidden novalidate>
+            <div class="mfa-prompt">
+              <h2>Verificación en dos pasos</h2>
+              <p>Ingresa el código de 6 dígitos de tu aplicación autenticadora.</p>
+            </div>
+            <div class="field-group">
+              <label for="mfa-login-code">Código TOTP</label>
+              <input
+                id="mfa-login-code"
+                name="code"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                maxlength="6"
+                placeholder="000000"
+                class="input-code"
+                required
+              />
+            </div>
+            <div class="form-actions-row">
+              <button type="button" class="btn btn-secondary" id="mfa-back-btn">Volver</button>
+              <button type="submit" class="btn btn-primary" id="mfa-verify-btn">Verificar y entrar</button>
+            </div>
+          </form>
+
+          <!-- Register Form -->
+          <form id="register-form" class="auth-form" hidden novalidate>
+            <div class="field-group">
+              <label for="reg-name">Nombre completo</label>
+              <input id="reg-name" name="name" type="text" autocomplete="name" placeholder="Elena Morales" required />
+            </div>
+            <div class="field-group">
+              <label for="reg-email">Correo electrónico</label>
+              <input id="reg-email" name="email" type="email" autocomplete="email" placeholder="elena@ejemplo.com" required />
+            </div>
+            <div class="field-group">
+              <label for="reg-phone">Teléfono o documento sensible <span class="label-opt">(opcional)</span></label>
+              <input id="reg-phone" name="phone" type="text" autocomplete="tel" placeholder="+52 555 123 4567" />
+              <p class="field-hint">Se almacena cifrado con AES-256-GCM y se muestra enmascarado.</p>
+            </div>
+            <div class="field-group">
+              <label for="reg-password">Contraseña</label>
+              <input id="reg-password" name="password" type="password" autocomplete="new-password" placeholder="Mínimo 12 caracteres" required />
+              <ul id="password-rules" class="password-rules" aria-label="Requisitos de contraseña">
+                <li data-rule="length">12+ caracteres</li>
+                <li data-rule="upper">Mayúscula</li>
+                <li data-rule="lower">Minúscula</li>
+                <li data-rule="number">Número</li>
+                <li data-rule="symbol">Símbolo</li>
+              </ul>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="register-submit">
+              Crear bóveda personal
+            </button>
+          </form>
+
+          <!-- Recovery Form -->
+          <div id="recovery-panel" class="auth-form" hidden>
+            <form id="forgot-form" class="stack-sm" novalidate>
+              <div class="field-group">
+                <label for="forgot-email">Solicitar token de recuperación</label>
+                <input id="forgot-email" name="email" type="email" autocomplete="email" placeholder="nombre@ejemplo.com" required />
+              </div>
+              <button type="submit" class="btn btn-secondary btn-full">Generar solicitud</button>
+            </form>
+
+            <hr class="hairline-divider" />
+
+            <form id="reset-form" class="stack-sm" novalidate>
+              <div class="field-group">
+                <label for="reset-token">Token de un solo uso</label>
+                <input id="reset-token" name="token" type="text" placeholder="64 caracteres hexadecimales" class="input-mono" required />
+              </div>
+              <div class="field-group">
+                <label for="reset-password">Nueva contraseña</label>
+                <input id="reset-password" name="newPassword" type="password" autocomplete="new-password" placeholder="Mínimo 12 caracteres seguros" required />
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Restablecer contraseña</button>
+            </form>
+          </div>
+        </section>
+
+        <footer class="auth-footer">
+          <div class="status-pill" id="auth-health-pill">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="auth-health-text">Verificando estado...</span>
+          </div>
+          <button type="button" class="btn-icon theme-toggle-btn" aria-label="Cambiar apariencia claro u oscuro" title="Cambiar apariencia">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          </button>
+        </footer>
+      </div>
+    </main>
+
+    <!-- Authenticated Workspace -->
+    <div id="app-shell" class="app-shell" hidden>
+      <!-- Translucent macOS-style Sidebar -->
+      <aside class="sidebar" aria-label="Navegación principal">
+        <div class="sidebar-header">
+          <div class="brand-inline">
+            <span class="vault-emblem-sm" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="11" width="16" height="10" rx="3" />
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+            </span>
+            <span class="brand-name">SecureVault</span>
+          </div>
+          <button type="button" class="btn-icon theme-toggle-btn" aria-label="Cambiar apariencia claro u oscuro" title="Cambiar apariencia">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+            </svg>
+          </button>
+        </div>
+
+        <nav class="sidebar-nav" aria-label="Secciones de la bóveda">
+          <button type="button" class="nav-item is-active" data-view="notes">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" />
+              <path d="M14 3v6h6M8 13h8M8 17h5" />
+            </svg>
+            <span>Notas privadas</span>
+            <span id="sidebar-notes-count" class="nav-badge">0</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="profile">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 2l7 3v6c0 5-3.5 9.5-7 11-3.5-1.5-7-6-7-11V5l7-3z" />
+              <path d="M9.5 12.5l1.8 1.8 3.7-4" />
+            </svg>
+            <span>Perfil y seguridad</span>
+          </button>
+
+          <button type="button" class="nav-item" data-view="admin" id="nav-admin-btn" hidden>
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 5h18M3 12h18M3 19h18" />
+              <circle cx="8" cy="5" r="2" fill="var(--canvas)" />
+              <circle cx="16" cy="12" r="2" fill="var(--canvas)" />
+              <circle cx="10" cy="19" r="2" fill="var(--canvas)" />
+            </svg>
+            <span>Administración</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-chip">
+            <div class="user-avatar" id="sidebar-avatar" aria-hidden="true">U</div>
+            <div class="user-meta">
+              <div class="user-name" id="sidebar-user-name">Usuario</div>
+              <div class="user-role" id="sidebar-user-role">usuario</div>
+            </div>
+          </div>
+
+          <div class="sidebar-footer-actions">
+            <div class="status-pill" id="app-health-pill">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span id="app-health-text">Servicio activo</span>
+            </div>
+            <button type="button" class="btn-link-danger" id="logout-btn">Cerrar sesión</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Workspace -->
+      <main id="main-content" class="workspace">
+        <!-- View 1: Encrypted Notes (Master-Detail like Apple Notes) -->
+        <section id="view-notes" class="view-section">
+          <header class="floating-toolbar">
+            <div class="toolbar-leading">
+              <h1>Notas privadas</h1>
+              <span class="toolbar-meta" id="notes-quota-label">0 de 50 notas</span>
+            </div>
+            <div class="toolbar-actions">
+              <input type="search" id="notes-search" class="search-field" placeholder="Buscar notas" aria-label="Buscar notas" />
+              <button type="button" class="btn btn-primary" id="new-note-btn">Nueva nota</button>
+            </div>
+          </header>
+
+          <div class="notes-split">
+            <div class="notes-list-pane" aria-label="Lista de notas">
+              <ul id="notes-list" class="notes-list"></ul>
+              <div id="notes-empty-list" class="empty-state" hidden>
+                <p class="empty-title">Sin notas cifradas</p>
+                <p class="empty-desc">Crea tu primera nota privada. El contenido se cifra con AES-256-GCM antes de guardarse.</p>
+                <button type="button" class="btn btn-primary" id="empty-create-note-btn">Crear primera nota</button>
+              </div>
+            </div>
+
+            <div class="notes-editor-pane">
+              <form id="note-editor-form" class="note-editor" novalidate>
+                <div class="editor-meta-bar">
+                  <span id="editor-crypto-pill" class="crypto-pill">AES-256-GCM · IV único</span>
+                  <span id="editor-char-count" class="char-counter">0 / 10,000</span>
+                </div>
+
+                <input
+                  type="text"
+                  id="note-title-input"
+                  class="editor-title"
+                  placeholder="Título de la nota"
+                  maxlength="150"
+                  required
+                />
+
+                <textarea
+                  id="note-content-input"
+                  class="editor-textarea"
+                  placeholder="Escribe aquí información confidencial. Solo tu cuenta puede descifrarla."
+                  maxlength="10000"
+                  required
+                ></textarea>
+
+                <div class="editor-footer">
+                  <span id="editor-updated-at" class="editor-timestamp">Sin guardar</span>
+                  <div class="editor-buttons">
+                    <button type="button" class="btn btn-danger-subtle" id="delete-note-btn" hidden>
+                      Eliminar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="save-note-btn">
+                      Guardar nota
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- View 2: Profile, Sensitive Data & MFA TOTP -->
+        <section id="view-profile" class="view-section" hidden>
+          <header class="floating-toolbar">
+            <div class="toolbar-leading">
+              <h1>Perfil y seguridad</h1>
+              <span class="toolbar-meta">Datos cifrados y autenticación en dos pasos</span>
+            </div>
+          </header>
+
+          <div class="settings-container">
+            <section class="settings-group" aria-labelledby="profile-heading">
+              <h2 id="profile-heading" class="group-title">Identidad y dato sensible</h2>
+              <form id="profile-form" class="inset-panel" novalidate>
+                <div class="inset-row">
+                  <div class="row-info">
+                    <label for="profile-name">Nombre</label>
+                    <span class="row-sub" id="profile-email-display"></span>
+                  </div>
+                  <input id="profile-name" type="text" class="inset-input" required />
+                </div>
+
+                <div class="inset-row">
+                  <div class="row-info">
+                    <label for="profile-phone">Teléfono o documento</label>
+                    <span class="row-sub">
+                      Valor actual:
+                      <strong id="profile-phone-masked" class="mono-inline">No registrado</strong>
+                    </span>
+                  </div>
+                  <div class="sensitive-controls">
+                    <input id="profile-phone" type="text" class="inset-input" placeholder="Actualizar valor cifrado" />
+                    <button type="button" class="btn btn-secondary" id="reveal-phone-btn" hidden>
+                      Revelar
+                    </button>
+                  </div>
+                </div>
+
+                <div class="inset-row inset-row-actions">
+                  <span class="row-sub">El dato sensible se cifra con AES-256-GCM y cada revelación queda auditada.</span>
+                  <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="settings-group" aria-labelledby="mfa-heading">
+              <h2 id="mfa-heading" class="group-title">Verificación en dos pasos (TOTP)</h2>
+              <div class="inset-panel">
+                <div class="inset-row">
+                  <div class="row-info">
+                    <span class="row-label">Aplicación autenticadora (RFC 6238)</span>
+                    <span class="row-sub" id="mfa-status-desc">Protege tu bóveda con códigos temporales de 6 dígitos.</span>
+                  </div>
+                  <div class="mfa-action-group">
+                    <span id="mfa-status-badge" class="status-badge">Desactivado</span>
+                    <button type="button" class="btn btn-primary" id="mfa-setup-btn">Configurar</button>
+                    <button type="button" class="btn btn-danger-subtle" id="mfa-disable-open-btn" hidden>Desactivar</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- View 3: Admin Panel (RF-07) -->
+        <section id="view-admin" class="view-section" hidden>
+          <header class="floating-toolbar">
+            <div class="toolbar-leading">
+              <h1>Administración</h1>
+              <span class="toolbar-meta">Usuarios, bitácora de seguridad y gestión criptográfica</span>
+            </div>
+            <div class="toolbar-actions">
+              <button type="button" class="btn btn-secondary" id="admin-refresh-btn">Actualizar</button>
+            </div>
+          </header>
+
+          <div class="admin-container">
+            <div id="admin-segmented" class="segmented-control segmented-inline" role="tablist" aria-label="Paneles de administración">
+              <div class="segmented-thumb" aria-hidden="true"></div>
+              <button type="button" class="segmented-btn is-active" role="tab" aria-selected="true" data-admin-tab="users">
+                Usuarios
+              </button>
+              <button type="button" class="segmented-btn" role="tab" aria-selected="false" data-admin-tab="logs">
+                Bitácora
+              </button>
+              <button type="button" class="segmented-btn" role="tab" aria-selected="false" data-admin-tab="alerts">
+                Alertas y llaves
+              </button>
+            </div>
+
+            <!-- Admin Users Table -->
+            <div id="admin-tab-users" class="admin-pane">
+              <div class="table-surface">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Dato enmascarado</th>
+                      <th>Rol</th>
+                      <th>MFA</th>
+                      <th>Estado</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-users-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Admin Audit Logs Table -->
+            <div id="admin-tab-logs" class="admin-pane" hidden>
+              <div class="filter-bar">
+                <label for="audit-filter-select" class="sr-only">Filtrar por tipo de evento</label>
+                <select id="audit-filter-select" class="select-field">
+                  <option value="">Todos los eventos</option>
+                  <option value="LOGIN_SUCCESS">LOGIN_SUCCESS</option>
+                  <option value="LOGIN_FAILED">LOGIN_FAILED</option>
+                  <option value="ACCOUNT_LOCKED">ACCOUNT_LOCKED</option>
+                  <option value="ACCESS_DENIED">ACCESS_DENIED</option>
+                  <option value="IDOR_ATTEMPT">IDOR_ATTEMPT</option>
+                  <option value="ROLE_CHANGED">ROLE_CHANGED</option>
+                  <option value="RATE_LIMIT_EXCEEDED">RATE_LIMIT_EXCEEDED</option>
+                  <option value="KEY_ROTATION">KEY_ROTATION</option>
+                  <option value="SENSITIVE_DATA_REVEALED">SENSITIVE_DATA_REVEALED</option>
+                </select>
+              </div>
+              <div class="table-surface">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha (UTC)</th>
+                      <th>Evento</th>
+                      <th>Severidad</th>
+                      <th>Actor</th>
+                      <th>IP</th>
+                      <th>Detalle</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-logs-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Admin Alerts & Key Rotation -->
+            <div id="admin-tab-alerts" class="admin-pane" hidden>
+              <div class="inset-panel key-rotation-panel">
+                <div class="inset-row">
+                  <div class="row-info">
+                    <span class="row-label">Rotación de llaves AES-256-GCM</span>
+                    <span class="row-sub" id="key-version-info">Versión activa: v1</span>
+                  </div>
+                  <button type="button" class="btn btn-primary" id="rotate-keys-btn">
+                    Re-cifrar registros antiguos
+                  </button>
+                </div>
+              </div>
+
+              <div class="table-surface">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Alerta</th>
+                      <th>Severidad</th>
+                      <th>Resumen</th>
+                      <th>Estado</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-alerts-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Spring-driven Interactive Sheet (Drag-to-dismiss + velocity projection) -->
+    <div id="sheet-backdrop" class="sheet-backdrop" hidden>
+      <div id="sheet-panel" class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div id="sheet-drag-handle" class="sheet-handle-area" aria-hidden="true">
+          <div class="sheet-grabber"></div>
+        </div>
+        <h2 id="sheet-title" class="sheet-title">Confirmación</h2>
+        <div id="sheet-body" class="sheet-body"></div>
+      </div>
+    </div>
+
+    <!-- Non-blocking Toast -->
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  </body>
+</html>
